@@ -1,10 +1,16 @@
-import React, { useEffect } from 'react';
-import './App.css';
-import useGetProducts from './hooks/useGetProducts';
+import React, { useEffect, useState } from 'react';
 import ProductList from './components/ProductList';
+import SearchBox from './components/SearchBox';
+import useGetProducts from './hooks/useGetProducts';
+import './App.css';
 
 const App = () => {
+  const [searchText, setSearchText] = useState<string>('');
   const { products, hasMore, getProducts } = useGetProducts();
+
+  useEffect(() => {
+    getProducts();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -15,16 +21,18 @@ const App = () => {
       ) {
         return;
       }
-      getProducts();
+      getProducts(searchText);
     };
 
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
-  }, [hasMore]);
+  }, [hasMore, searchText]);
+
+  const onTextChanged = (newSearchText: string) => setSearchText(newSearchText);
 
   return (
     <div className="container">
-      <input className="search-box" placeholder="Search products by title" />
+      <SearchBox searchText={searchText} onTextChanged={onTextChanged} />
       <ProductList products={products} />
     </div>
   );
