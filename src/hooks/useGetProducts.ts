@@ -7,7 +7,7 @@ const useGetProducts = () => {
   const [totalPages, setTotalPages] = useState<number>(0);
 
   const getProducts = useCallback(
-    async (searchText: string, currentPage: number): Promise<void> => {
+    async (searchText: string, currentPage: number, prevSearch = ''): Promise<void> => {
       const response = await fetch(
         `https://dummyjson.com/products/search?q=${searchText}&limit=${PAGE_SIZE}&skip=${
           PAGE_SIZE * (currentPage - 1)
@@ -17,7 +17,12 @@ const useGetProducts = () => {
       const { products: retrievedProducts, total } = responseResult;
 
       setTotalPages(Math.ceil(total / PAGE_SIZE));
-      setProducts(prevState => [...prevState, ...retrievedProducts]);
+
+      if (prevSearch === searchText) {
+        setProducts(prevState => [...prevState, ...retrievedProducts]);
+      } else {
+        setProducts(retrievedProducts);
+      }
     },
     []
   );

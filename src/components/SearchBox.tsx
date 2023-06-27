@@ -1,25 +1,36 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
-import useGetProducts from '../hooks/useGetProducts';
 
 interface SearchBoxProps {
   searchText: string;
+  prevSearchText: string;
   setCurrentPage: (pageNumber: number) => void;
   onTextChanged: (value: string) => void;
+  onPreSearchTextChanged: (value: string) => void;
+  getProducts: (searchText: string, currentPage: number, prevSearchText: string) => void;
 }
 
-const SearchBox = ({ searchText, setCurrentPage, onTextChanged }: SearchBoxProps) => {
-  const { getProducts } = useGetProducts();
+const SearchBox = ({
+  searchText,
+  prevSearchText,
+  setCurrentPage,
+  onTextChanged,
+  onPreSearchTextChanged,
+  getProducts,
+}: SearchBoxProps) => {
   const searchProducts = useCallback(
-    debounce((value: string) => getProducts(value, 1), 1000),
-    []
+    debounce((value: string) => {
+      getProducts(value, 1, prevSearchText);
+      onPreSearchTextChanged(value);
+      setCurrentPage(2);
+    }, 1000),
+    [prevSearchText]
   );
 
   const onSearchTextChanged = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchText = event.target.value;
     onTextChanged(newSearchText);
-    searchProducts(newSearchText.toLowerCase());
-    setCurrentPage(1);
+    searchProducts(newSearchText);
   };
 
   return (
