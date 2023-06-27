@@ -4,13 +4,14 @@ import useGetProducts from '../hooks/useGetProducts';
 
 interface SearchBoxProps {
   searchText: string;
+  setCurrentPage: (pageNumber: number) => void;
   onTextChanged: (value: string) => void;
 }
 
-const SearchBox = ({ searchText, onTextChanged }: SearchBoxProps) => {
+const SearchBox = ({ searchText, setCurrentPage, onTextChanged }: SearchBoxProps) => {
   const { getProducts } = useGetProducts();
   const searchProducts = useCallback(
-    debounce((value: string) => getProducts(value), 1000),
+    debounce((value: string) => getProducts(value, 1), 1000),
     []
   );
 
@@ -18,6 +19,7 @@ const SearchBox = ({ searchText, onTextChanged }: SearchBoxProps) => {
     const newSearchText = event.target.value;
     onTextChanged(newSearchText);
     searchProducts(newSearchText.toLowerCase());
+    setCurrentPage(1);
   };
 
   return (

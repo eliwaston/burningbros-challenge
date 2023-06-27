@@ -3,27 +3,28 @@ import { PAGE_SIZE } from '../constants';
 import IProduct from '../types/IProduct';
 
 const useGetProducts = () => {
-  let page = 1;
   const [products, setProducts] = useState<Array<IProduct>>([]);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
-  const getProducts = useCallback(async (searchText = ''): Promise<void> => {
-    const response = await fetch(
-      `https://dummyjson.com/products/search?q=${searchText}&limit=${PAGE_SIZE}&skip=${
-        PAGE_SIZE * (page - 1)
-      }&select=id,title,price,images`
-    );
-    const responseResult = await response.json();
-    const { products: retrievedProducts, total } = responseResult;
+  const getProducts = useCallback(
+    async (searchText: string, currentPage: number): Promise<void> => {
+      const response = await fetch(
+        `https://dummyjson.com/products/search?q=${searchText}&limit=${PAGE_SIZE}&skip=${
+          PAGE_SIZE * (currentPage - 1)
+        }&select=id,title,price,images`
+      );
+      const responseResult = await response.json();
+      const { products: retrievedProducts, total } = responseResult;
 
-    setHasMore(total > page * PAGE_SIZE);
-    page += 1;
-    setProducts(prevState => [...prevState, ...retrievedProducts]);
-  }, []);
+      setTotalPages(Math.ceil(total / PAGE_SIZE));
+      setProducts(prevState => [...prevState, ...retrievedProducts]);
+    },
+    []
+  );
 
   return {
     products,
-    hasMore,
+    totalPages,
     getProducts,
   };
 };
